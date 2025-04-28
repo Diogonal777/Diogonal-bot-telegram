@@ -1,0 +1,38 @@
+module.exports = async function (context, req) {
+        const message = context.messageText ? context.messageText.trim().toLowerCase() : '';
+
+            if (message === '/start') {
+                        await context.sendText('Добро пожаловать! Выберите действие:', {
+                                        suggestions: ['Помощь', 'О нас']
+                        });
+            } 
+                else if (message === 'помощь') {
+                            await context.sendText('Я могу помочь вам узнать информацию или связаться с нами.', {
+                                            suggestions: ['О нас', 'Начать заново']
+                            });
+                }
+                    else if (message === 'о нас') {
+                                await context.sendText('Мы создаём умные приложения для платформы Салют!');
+                    }
+                        else if (message === 'начать заново') {
+                                    await context.sendText('Выберите действие:', {
+                                                    suggestions: ['Помощь', 'О нас']
+                                    });
+                        }
+                            else {
+                                        await context.sendText(`Не понял команду "${context.messageText}". Выберите действие:`, {
+                                                        suggestions: ['Помощь', 'О нас']
+                                        });
+                            }
+};
+
+                                        })
+                            }
+                                    })
+                        }
+                    }
+                            })
+                }
+                        })
+            }
+}
