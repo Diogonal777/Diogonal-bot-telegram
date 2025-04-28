@@ -2,7 +2,7 @@
   "project" : {
     "id" : "moj_bot_v_telegram-7006358-aAb",
     "name" : "moj_bot_v_telegram-7006358-aAb",
-    "folder" : "/"
+    "folder" : "/jaicp"
   },
   "settings" : {
     "language" : "ru",
@@ -14,19 +14,23 @@
     "business" : false
   },
   "intents" : [ {
-    "id" : 906547,
+    "id" : 905621,
     "path" : "/Новый интент",
     "enabled" : true,
     "businessShared" : false,
     "business" : false,
-    "phrases" : [ ]
+    "phrases" : [ ],
+    "patterns" : [ ],
+    "slots" : [ ]
   }, {
-    "id" : 903547,
+    "id" : 905622,
     "path" : "/Новый интент 1",
     "enabled" : true,
     "businessShared" : false,
     "business" : false,
-    "phrases" : [ ]
+    "phrases" : [ ],
+    "patterns" : [ ],
+    "slots" : [ ]
   } ],
   "entities" : [ ],
   "enabledSystemEntities" : [ "duckling.number", "duckling.time", "duckling.duration", "duckling.phone-number", "duckling.email", "duckling.url" ]
