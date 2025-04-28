@@ -1,0 +1,3 @@
+module.exports = async function (context, req) {
+        await context.sendText('Привет! Бот работает.');
+};

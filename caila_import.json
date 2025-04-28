@@ -14,7 +14,7 @@
     "business" : false
   },
   "intents" : [ {
-    "id" : 903552,
+    "id" : 907045,
     "path" : "/Новый интент",
     "enabled" : true,
     "businessShared" : false,
@@ -23,7 +23,7 @@
     "patterns" : [ ],
     "slots" : [ ]
   }, {
-    "id" : 903553,
+    "id" : 907046,
     "path" : "/Новый интент 1",
     "enabled" : true,
     "businessShared" : false,
