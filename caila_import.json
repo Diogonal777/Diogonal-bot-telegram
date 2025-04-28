@@ -1,0 +1,33 @@
+{
+  "project" : {
+    "id" : "moj_bot_v_telegram-7006358-aAb",
+    "name" : "moj_bot_v_telegram-7006358-aAb",
+    "folder" : "/"
+  },
+  "settings" : {
+    "language" : "ru",
+    "spellingCorrection" : false,
+    "classificationAlgorithm" : "sts",
+    "timezone" : "UTC",
+    "shared" : false,
+    "businessShared" : false,
+    "business" : false
+  },
+  "intents" : [ {
+    "id" : 906547,
+    "path" : "/Новый интент",
+    "enabled" : true,
+    "businessShared" : false,
+    "business" : false,
+    "phrases" : [ ]
+  }, {
+    "id" : 903547,
+    "path" : "/Новый интент 1",
+    "enabled" : true,
+    "businessShared" : false,
+    "business" : false,
+    "phrases" : [ ]
+  } ],
+  "entities" : [ ],
+  "enabledSystemEntities" : [ "duckling.number", "duckling.time", "duckling.duration", "duckling.phone-number", "duckling.email", "duckling.url" ]
+}
