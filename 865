@@ -1,0 +1,29 @@
+module.exports = async function (context, req) {
+        const message = context.messageText ? context.messageText.trim().toLowerCase() : '';
+
+            if (message === '/start') {
+                        await context.sendJson({
+                                        messageName: 'ANSWER_TO_USER',
+                                                    intents: {},
+                                                                state: {},
+                                                                            smart_app_data: {},
+                                                                                        payload: {
+                                                                                                            items: [
+                                                                                                                                    {
+                                                                                                                                                                type: 'bubble',
+                                                                                                                                                                                        bubble: {
+                                                                                                                                                                                                                        text: 'Добро пожаловать! Выберите действие:',
+                                                                                                                                                                                                                                                    markdown: true
+                                                                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                            ],
+                                                                                                                            suggestions: [
+                                                                                                                                                    { title: 'Помощь' },
+                                                                                                                                                                        { title: 'О нас' }
+                                                                                                                            ]
+                                                                                        }
+                        });
+            } else {
+                        await context.sendText('Привет! Напишите /start для начала.');
+            }
+};
