@@ -1,7 +1,7 @@
 {
   "project" : {
-    "id" : "moj_bot_v_telegram-7006358-aAb",
-    "name" : "moj_bot_v_telegram-7006358-aAb",
+    "id" : "bot_telegram-7006358-vqb",
+    "name" : "bot_telegram-7006358-vqb",
     "folder" : "/jaicp"
   },
   "settings" : {
@@ -14,7 +14,7 @@
     "business" : false
   },
   "intents" : [ {
-    "id" : 903548,
+    "id" : 903552,
     "path" : "/Новый интент",
     "enabled" : true,
     "businessShared" : false,
@@ -23,7 +23,7 @@
     "patterns" : [ ],
     "slots" : [ ]
   }, {
-    "id" : 903549,
+    "id" : 903553,
     "path" : "/Новый интент 1",
     "enabled" : true,
     "businessShared" : false,
