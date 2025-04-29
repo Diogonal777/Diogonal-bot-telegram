@@ -7,8 +7,6 @@ const bot = new TelegramBot(token);
 
 const userStates = {};
 
-const port = process.env.PORT || 3090 ;
-
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   userStates[chatId] = null;
