@@ -3,7 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_TOKEN;
 const ADMIN_ID = 6091948159; // ← замени на свой Telegram ID
 
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token);
 
 const userStates = {};
 
@@ -112,5 +112,21 @@ bot.on('message', (msg) => {
     });
 
     userStates[chatId] = null;
+    const express = require('express');
+    const bodyParser = require('body-parser');
+
+    const app = express();
+    app.use(bodyParser.json());
+
+    app.post('/webhook', (req, res) => {
+     bot.processUpdate(req.body);
+     res.sendStatus(200);
+    });
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+     console.log(`Сервер запущен на порту ${PORT}`);
+    });
+
   }
 });
