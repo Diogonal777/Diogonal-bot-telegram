@@ -94,24 +94,23 @@ bot.on('message', (msg) => {
   const state = userStates[chatId];
   if (state && state.step === 'waiting_question') {
     const userName = `${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim();
+    const username = msg.from.username ? `@${msg.from.username}` : '(юзернейм отсутствует)';
     const topic = state.topic;
 
-    // Отправляем вопрос админу
-    bot.sendMessage(ADMIN_ID, `Новый вопрос от ${userName} (ID: ${chatId})\nТема: ${topic}\nВопрос: ${text}`);
+    // Отправляем администратору
+    bot.sendMessage(ADMIN_ID,
+      `Новый вопрос:\n\nОт: ${userName} (${username})\nID: ${chatId}\nТема: ${topic}\n\nВопрос:\n${text}`
+    );
 
     // Подтверждение пользователю
-    bot.sendMessage(chatId, 'Спасибо, ваш вопрос отправлен!');
-    userStates[chatId] = null;
-
-    // Возврат в главное меню
-    bot.sendMessage(chatId, 'Что хотите сделать дальше?', {
+    bot.sendMessage(chatId, 'Ваш вопрос отправлен!', {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Задать вопрос', callback_data: 'ask' }],
-          [{ text: 'Мои проекты', callback_data: 'projects' }],
-          [{ text: 'О боте', callback_data: 'about' }]
+          [{ text: 'Назад', callback_data: 'back_to_main' }]
         ]
       }
     });
+
+    userStates[chatId] = null;
   }
 });
