@@ -1,11 +1,13 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TELEGRAM_TOKEN;
-const ADMIN_ID = 6091948159; // ← замени на свой Telegram ID
+const ADMIN_ID = 6091948159;
 
 const bot = new TelegramBot(token);
 
 const userStates = {};
+
+const port = process.env.PORT || 3090 ;
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -112,6 +114,7 @@ bot.on('message', (msg) => {
     });
 
     userStates[chatId] = null;
+    
     const express = require('express');
     const bodyParser = require('body-parser');
 
