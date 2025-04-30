@@ -7,6 +7,7 @@ const ADMIN_ID = 6091948159;
 
 const bot = new TelegramBot(token);
 const userStates = {};
+const userQuestions = {};
 
 // Команда /start
 bot.onText(/\/start/, (msg) => {
@@ -110,12 +111,20 @@ if (['topic1', 'topic2', 'topic3'].includes(data)) {
   const targetId = data.split('_')[1];
   userStates[ADMIN_ID] = { step: 'awaiting_reply', targetId };
   bot.sendMessage(ADMIN_ID, 'Напишите ответ для пользователя:');
+  bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
+  chat_id: chatId,
+  message_id: messageId
+});
 }
 
 if (data.startsWith('ignore_')) {
   const targetId = data.split('_')[1];
   bot.sendMessage(targetId, 'Ваш вопрос был просмотрен, но остался без ответа.');
   bot.sendMessage(ADMIN_ID, 'Вопрос был проигнорирован.');
+  bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
+  chat_id: chatId,
+  message_id: messageId
+});
 }
 
 });
@@ -128,7 +137,7 @@ bot.on('message', (msg) => {
 
   if (msg.chat.id === ADMIN_ID && userStates[ADMIN_ID]?.step === 'awaiting_reply') {
   const targetId = userStates[ADMIN_ID].targetId;
-  const question = userStates[targetId]?.lastQuestion || '(вопрос не найден)';
+  const question = userQuestions[targetId]?.question || '(вопрос не найден)';
   bot.sendMessage(targetId, `Ваш вопрос:\n${question}\n\nОтвет администратора:\n${msg.text}`);
   bot.sendMessage(ADMIN_ID, 'Ответ отправлен.');
   userStates[ADMIN_ID] = null;
@@ -139,11 +148,15 @@ bot.on('message', (msg) => {
     const userName = `${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim();
     const username = msg.from.username ? `@${msg.from.username}` : '(юзернейм отсутствует)';
     const topic = state.topic;
-
-    userStates[chatId] = {
-  ...state,
-  lastQuestion: text
-};
+    
+    userQuestions[chatId] = {
+     question: text,
+     topic,
+     username,
+     name: userName
+    };
+   } 
+ });
 
 // Отправляем администратору
 bot.sendMessage(ADMIN_ID,
