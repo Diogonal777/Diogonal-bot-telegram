@@ -77,15 +77,15 @@ bot.on('callback_query', (query) => {
   }
 
   const topicTitles = {
-  topic1: 'Семья L.E.G.E.N.D.A',
-  topic2: 'Канал',
-  topic3: 'Личное'
+  topic1: 'семья L.E.G.E.N.D.A',
+  topic2: 'канал',
+  topic3: 'личное'
 };
 
 if (['topic1', 'topic2', 'topic3'].includes(data)) {
   const topicTitle = topicTitles[data];
   userStates[chatId] = { step: 'waiting_question', topic: topicTitle };
-  bot.editMessageText(`Вы выбрали ${topicTitle}. Напишите ваш вопрос:`, {
+  bot.editMessageText(`Вы выбрали тему ${topicTitle}. Напишите ваш вопрос:`, {
     chat_id: chatId,
     message_id: messageId
   });
@@ -159,7 +159,7 @@ bot.sendMessage(ADMIN_ID,
 });
 
 // Подтверждение пользователю
-bot.sendMessage(chatId, 'Ваш вопрос отправлен!', {
+bot.sendMessage(chatId, 'Ваш вопрос отправлен! Ожидайте ответа.', {
   reply_markup: {
     inline_keyboard: [
       [{ text: 'Назад', callback_data: 'back_to_main' }]
