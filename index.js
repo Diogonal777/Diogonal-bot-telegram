@@ -1,12 +1,14 @@
 const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 const token = process.env.TELEGRAM_TOKEN;
 const ADMIN_ID = 6091948159;
 
 const bot = new TelegramBot(token);
-
 const userStates = {};
 
+// Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   userStates[chatId] = null;
@@ -22,6 +24,7 @@ bot.onText(/\/start/, (msg) => {
   });
 });
 
+// Обработка кнопок
 bot.on('callback_query', (query) => {
   const chatId = query.message.chat.id;
   const messageId = query.message.message_id;
@@ -97,7 +100,7 @@ bot.on('message', (msg) => {
     const username = msg.from.username ? `@${msg.from.username}` : '(юзернейм отсутствует)';
     const topic = state.topic;
 
-    // Отправляем администратору
+    // Отправка админу
     bot.sendMessage(ADMIN_ID,
       `Новый вопрос:\n\nОт: ${userName} (${username})\nID: ${chatId}\nТема: ${topic}\n\nВопрос:\n${text}`
     );
@@ -105,29 +108,25 @@ bot.on('message', (msg) => {
     // Подтверждение пользователю
     bot.sendMessage(chatId, 'Ваш вопрос отправлен!', {
       reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Назад', callback_data: 'back_to_main' }]
-        ]
+        inline_keyboard: [[{ text: 'Назад', callback_data: 'back_to_main' }]]
       }
     });
 
     userStates[chatId] = null;
-    
-    const express = require('express');
-    const bodyParser = require('body-parser');
-
-    const app = express();
-    app.use(bodyParser.json());
-
-    app.post('/webhook', (req, res) => {
-     bot.processUpdate(req.body);
-     res.sendStatus(200);
-    });
-
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-     console.log(`Сервер запущен на порту ${PORT}`);
-    });
-
   }
+});
+
+
+// ВАЖНО: Express-сервер должен быть снаружи
+const app = express();
+app.use(bodyParser.json());
+
+app.post('/webhook', (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
 });
