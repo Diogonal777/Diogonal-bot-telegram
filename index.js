@@ -113,7 +113,7 @@ bot.on('callback_query', (query) => {
     const question = userQuestions[targetId]?.question || '(вопрос не найден)';
     userStates[ADMIN_ID] = { step: 'awaiting_reply', targetId };
 
-    bot.sendMessage(ADMIN_ID, `Напишите ответ для пользователя ${username} (${targetId}):\n\nВопрос: ${question}`);
+    bot.sendMessage(ADMIN_ID, `Напишите ответ для пользователя ${targetId}:\n\nВопрос: ${question}`);
     bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
       chat_id: chatId,
       message_id: messageId
@@ -123,7 +123,7 @@ bot.on('callback_query', (query) => {
   if (data.startsWith('ignore_')) {
     const targetId = data.split('_')[1];
     bot.sendMessage(targetId, 'Ваш вопрос был отклонён администратором.');
-    bot.sendMessage(ADMIN_ID, `Вы проигнорировали вопрос от ${username} (${targetId}).`);
+    bot.sendMessage(ADMIN_ID, `Вы проигнорировали вопрос от ${targetId}.`);
     bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
       chat_id: chatId,
       message_id: messageId
