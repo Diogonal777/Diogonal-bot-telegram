@@ -18,7 +18,8 @@ bot.onText(/\/start/, (msg) => {
       inline_keyboard: [
         [{ text: 'Задать вопрос', callback_data: 'ask' }],
         [{ text: 'Мои проекты', callback_data: 'projects' }],
-        [{ text: 'О боте', callback_data: 'about' }]
+        [{ text: 'Обо мне', callback_data: 'about me' }],
+        [{ text: 'О боте', callback_data: 'about bot' }]
       ]
     }
   });
@@ -36,9 +37,9 @@ bot.on('callback_query', (query) => {
       message_id: messageId,
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Тема 1', callback_data: 'topic1' }],
-          [{ text: 'Тема 2', callback_data: 'topic2' }],
-          [{ text: 'Тема 3', callback_data: 'topic3' }],
+          [{ text: 'Семья L.E.G.E.N.D.A', callback_data: 'topic1' }],
+          [{ text: 'Канал', callback_data: 'topic2' }],
+          [{ text: 'Личное', callback_data: 'topic3' }],
           [{ text: 'Назад', callback_data: 'back_to_main' }]
         ]
       }
@@ -46,7 +47,7 @@ bot.on('callback_query', (query) => {
   }
 
   if (data === 'projects') {
-    bot.editMessageText('Это тест 1', {
+    bot.editMessageText('Проекты Diogpnal777:\n\nСайт: hhtps://diogonal777.github.io/Diogonal-game\nМобильная игра: (потом добавлю)\nСайт: hhtps://taplink.cc/diogonal\nСемья в Grand mobile: hhtps://taplink.cc/l.e.g.e.n.d.a', {
       chat_id: chatId,
       message_id: messageId,
       reply_markup: {
@@ -55,8 +56,18 @@ bot.on('callback_query', (query) => {
     });
   }
 
-  if (data === 'about') {
-    bot.editMessageText('Это тест 2', {
+  if (data === 'about me') {
+    bot.editMessageText('Я Diogonal777 (Вадим).\nКогда скучно создаю разные проекты.', {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: {
+        inline_keyboard: [[{ text: 'Назад', callback_data: 'back_to_main' }]]
+      }
+    });
+  }
+  
+  if (data === 'about bot') {
+    bot.editMessageText('Создавал я бот с небольшой помощью chat GPT. В основном код писал сам.\n\nЕсли что-то не работает напишите мне @Diogonal777\nБот отвечает в течении минуты. Я буду развивать его', {
       chat_id: chatId,
       message_id: messageId,
       reply_markup: {
@@ -66,9 +77,9 @@ bot.on('callback_query', (query) => {
   }
 
   const topicTitles = {
-  topic1: 'Тема 1',
-  topic2: 'Тема 2',
-  topic3: 'Тема 3'
+  topic1: 'Семья L.E.G.E.N.D.A',
+  topic2: 'Канал',
+  topic3: 'Личное'
 };
 
 if (['topic1', 'topic2', 'topic3'].includes(data)) {
@@ -89,7 +100,8 @@ if (['topic1', 'topic2', 'topic3'].includes(data)) {
         inline_keyboard: [
           [{ text: 'Задать вопрос', callback_data: 'ask' }],
           [{ text: 'Мои проекты', callback_data: 'projects' }],
-          [{ text: 'О боте', callback_data: 'about' }]
+          [{ text: 'Обо мне', callback_data: 'about me' }],
+          [{ text: 'О боте', callback_data: 'about bot' }]
         ]
       }
     });
@@ -116,7 +128,8 @@ bot.on('message', (msg) => {
 
   if (msg.chat.id === ADMIN_ID && userStates[ADMIN_ID]?.step === 'awaiting_reply') {
   const targetId = userStates[ADMIN_ID].targetId;
-  bot.sendMessage(targetId, `Ответ от администратора:\n\n${msg.text}`);
+  const question = userStates[targetId]?.lastQuestion || '(вопрос не найден)';
+  bot.sendMessage(targetId, `Ваш вопрос:\n${question}\n\nОтвет администратора:\n${msg.text}`);
   bot.sendMessage(ADMIN_ID, 'Ответ отправлен.');
   userStates[ADMIN_ID] = null;
   return;
