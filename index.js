@@ -65,13 +65,20 @@ bot.on('callback_query', (query) => {
     });
   }
 
-  if (['topic1', 'topic2', 'topic3'].includes(data)) {
-    userStates[chatId] = { step: 'waiting_question', topic: data };
-    bot.editMessageText(`Вы выбрали ${data}. Напишите ваш вопрос:`, {
-      chat_id: chatId,
-      message_id: messageId
-    });
-  }
+  const topicTitles = {
+  topic1: 'Тема 1',
+  topic2: 'Тема 2',
+  topic3: 'Тема 3'
+};
+
+if (['topic1', 'topic2', 'topic3'].includes(data)) {
+  const topicTitle = topicTitles[data];
+  userStates[chatId] = { step: 'waiting_question', topic: topicTitle };
+  bot.editMessageText(`Вы выбрали ${topicTitle}. Напишите ваш вопрос:`, {
+    chat_id: chatId,
+    message_id: messageId
+  });
+}
 
   if (data === 'back_to_main') {
     userStates[chatId] = null;
@@ -87,30 +94,66 @@ bot.on('callback_query', (query) => {
       }
     });
   }
+  if (data.startsWith('reply_')) {
+  const targetId = data.split('_')[1];
+  userStates[ADMIN_ID] = { step: 'awaiting_reply', targetId };
+  bot.sendMessage(ADMIN_ID, 'Напишите ответ для пользователя:');
+}
+
+if (data.startsWith('ignore_')) {
+  const targetId = data.split('_')[1];
+  bot.sendMessage(targetId, 'Ваш вопрос был просмотрен, но остался без ответа.');
+  bot.sendMessage(ADMIN_ID, 'Вопрос был проигнорирован.');
+}
+
 });
 
 // Обработка текстов от пользователя
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
-
   const state = userStates[chatId];
+
+  if (msg.chat.id === ADMIN_ID && userStates[ADMIN_ID]?.step === 'awaiting_reply') {
+  const targetId = userStates[ADMIN_ID].targetId;
+  bot.sendMessage(targetId, `Ответ от администратора:\n\n${msg.text}`);
+  bot.sendMessage(ADMIN_ID, 'Ответ отправлен.');
+  userStates[ADMIN_ID] = null;
+  return;
+  }
+  
   if (state && state.step === 'waiting_question') {
     const userName = `${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim();
     const username = msg.from.username ? `@${msg.from.username}` : '(юзернейм отсутствует)';
     const topic = state.topic;
 
-    // Отправка админу
-    bot.sendMessage(ADMIN_ID,
-      `Новый вопрос:\n\nОт: ${userName} (${username})\nID: ${chatId}\nТема: ${topic}\n\nВопрос:\n${text}`
-    );
+    userStates[chatId] = {
+  ...state,
+  lastQuestion: text
+};
 
-    // Подтверждение пользователю
-    bot.sendMessage(chatId, 'Ваш вопрос отправлен!', {
-      reply_markup: {
-        inline_keyboard: [[{ text: 'Назад', callback_data: 'back_to_main' }]]
-      }
-    });
+// Отправляем администратору
+bot.sendMessage(ADMIN_ID,
+  `Новый вопрос:\n\nОт: ${userName} (${username})\nID: ${chatId}\nТема: ${topic}\n\nВопрос:\n${text}`, {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: '✅ Ответить', callback_data: `reply_${chatId}` },
+          { text: '❌ Игнорировать', callback_data: `ignore_${chatId}` }
+        ]
+      ]
+    }
+});
+
+// Подтверждение пользователю
+bot.sendMessage(chatId, 'Ваш вопрос отправлен!', {
+  reply_markup: {
+    inline_keyboard: [
+      [{ text: 'Назад', callback_data: 'back_to_main' }]
+    ]
+  }
+});
+
 
     userStates[chatId] = null;
   }
