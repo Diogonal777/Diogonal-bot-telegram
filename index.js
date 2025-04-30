@@ -47,7 +47,7 @@ bot.on('callback_query', (query) => {
   }
 
   if (data === 'projects') {
-    bot.editMessageText('Проекты Diogpnal777:\n\nСайт: hhtps://diogonal777.github.io/Diogonal-game\nМобильная игра: (потом добавлю)\nСайт: hhtps://taplink.cc/diogonal\nСемья в Grand mobile: hhtps://taplink.cc/l.e.g.e.n.d.a', {
+    bot.editMessageText('Проекты Diogpnal777:\n\nСайт: https://diogonal777.github.io/Diogonal-game\nМобильная игра: (потом добавлю)\nСайт: https://taplink.cc/diogonal\nСемья в Grand mobile: https://taplink.cc/l.e.g.e.n.d.a', {
       chat_id: chatId,
       message_id: messageId,
       reply_markup: {
@@ -67,7 +67,7 @@ bot.on('callback_query', (query) => {
   }
   
   if (data === 'about bot') {
-    bot.editMessageText('Создавал я бот с небольшой помощью chat GPT. В основном код писал сам.\n\nЕсли что-то не работает напишите мне @Diogonal777\nБот отвечает в течении минуты. Я буду развивать его', {
+    bot.editMessageText('Создаю я бот с небольшой помощью chat GPT. В основном код пишу сам.\n\nБот отвечает в течении минуты. Я буду развивать его\nЕсли что-то не работает напишите мне @Diogonal777', {
       chat_id: chatId,
       message_id: messageId,
       reply_markup: {
