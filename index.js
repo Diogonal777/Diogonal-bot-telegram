@@ -303,7 +303,6 @@ bot.on('message', (msg) => {
 
 // Запуск сервера Express
 const app = express();
-const path = require('path');
 app.use(bodyParser.json());
 
 app.post('/webhook', (req, res) => {
