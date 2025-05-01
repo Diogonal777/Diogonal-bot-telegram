@@ -17,12 +17,35 @@ if (!fs.existsSync(historyFile)) {
   fs.writeFileSync(historyFile, JSON.stringify([]));
 }
 
+let stats = loadStats();
 const stats = {
   total: 0,
   answered: 0,
   ignored: 0,
   users: new Set()
 };
+const statsFile = path.join(__dirname, 'stats.json');
+
+function loadStats() {
+  try {
+    if (!fs.existsSync(statsFile)) {
+      return { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
+    }
+    return JSON.parse(fs.readFileSync(statsFile, 'utf8'));
+  } catch {
+    return { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
+  }
+}
+
+function saveStats(stats) {
+  fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
+}
+
+function getCurrentWeek() {
+  const now = new Date();
+  const onejan = new Date(now.getFullYear(), 0, 1);
+  return Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+}
 
 function saveToHistory(entry, update = false) {
   try {
@@ -83,6 +106,10 @@ bot.on('callback_query', (query) => {
   const chatId = query.message.chat.id;
   const messageId = query.message.message_id;
   const data = query.data;
+  if (getCurrentWeek() !== stats.week) {
+  stats = { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
+  saveStats(stats);
+}
 
   if (data === 'ask') {
     bot.editMessageText('Выберите тему вопроса:', {
@@ -164,7 +191,8 @@ bot.on('callback_query', (query) => {
   const parts = data.split('_');
   const targetId = parts[1];
   const question = decodeURIComponent(parts.slice(2).join('_'));
-
+  stats.answered++;
+  saveStats(stats);
   userStates[ADMIN_ID] = { step: 'awaiting_reply', targetId };
 
   bot.sendMessage(ADMIN_ID, `Напишите ответ для ${userQuestions[targetId]?.username || '(пользователь)'} (${targetId}):\n\nВопрос: ${question}`);
@@ -182,7 +210,8 @@ if (data.startsWith('ignore_')) {
   const parts = data.split('_');
   const targetId = parts[1];
   const question = decodeURIComponent(parts.slice(2).join('_'));
-
+  stats.ignored++;
+  saveStats(stats);
   bot.sendMessage(targetId, 'Ваш вопрос был отклонён администратором.');
   bot.sendMessage(ADMIN_ID, `Вы проигнорировали вопрос от ${targetId}.`);
 
@@ -211,6 +240,10 @@ bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
   const state = userStates[chatId];
+  if (getCurrentWeek() !== stats.week) {
+  stats = { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
+  saveStats(stats);
+}
 
   if (chatId === ADMIN_ID && userStates[ADMIN_ID]?.step === 'awaiting_reply') {
     const targetId = userStates[ADMIN_ID].targetId;
@@ -232,6 +265,8 @@ bot.on('message', (msg) => {
 
   if (state && state.step === 'waiting_question') {
     stats.total++;
+     if (!stats.users.includes(userName)) stats.users.push(userName);
+     saveStats(stats);
     stats.users.add(`${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim());
     const userName = `${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim();
     const username = msg.from.username ? `@${msg.from.username}` : '(юзернейм отсутствует)';
@@ -292,11 +327,11 @@ bot.onText(/\/stats/, (msg) => {
 
   const userList = Array.from(stats.users).join('\n') || '(нет данных)';
   bot.sendMessage(ADMIN_ID,
-    `📊 Статистика:\n\n` +
-    `Всего вопросов: ${stats.total}\n` +
-    `Отвечено: ${stats.answered}\n` +
-    `Проигнорировано: ${stats.ignored}\n\n` +
-    `Писали:\n${userList}`
+  `📊 Статистика за эту неделю:\n\n` +
+  `Всего вопросов: ${stats.total}\n` +
+  `Отвечено: ${stats.answered}\n` +
+  `Проигнорировано: ${stats.ignored}\n\n` +
+  `Писали:\n${stats.users.join('\n') || '(никто)'}`
   );
 });
 
