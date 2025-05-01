@@ -150,6 +150,44 @@ bot.on('callback_query', (query) => {
   stats = { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
   saveStats(stats);
 }
+  if (chatId === ADMIN_ID && data === 'admin_stats') {
+  const userList = stats.users.join('\n') || '(нет данных)';
+  bot.sendMessage(chatId,
+    `📊 Статистика:\n\n` +
+    `Всего вопросов: ${stats.total}\n` +
+    `Отвечено: ${stats.answered}\n` +
+    `Проигнорировано: ${stats.ignored}\n\n` +
+    `Писали:\n${userList}`
+  );
+  return;
+}
+
+if (chatId === ADMIN_ID && data === 'admin_history_file') {
+  try {
+    const data = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+    if (!data.length) return bot.sendMessage(chatId, 'История пуста.');
+
+    const lines = data.map((entry, i) => {
+      return [
+        `#${i + 1}`,
+        `Дата: ${entry.timestamp}`,
+        `Пользователь: ${entry.userName} (ID: ${entry.userId})`,
+        `Тема: ${entry.topic}`,
+        `Вопрос: ${entry.question}`,
+        `Ответ: ${entry.answer || '(ещё нет)'}`,
+        `---`
+      ].join('\n');
+    });
+
+    const text = lines.join('\n\n');
+    const filePath = path.join(__dirname, 'history.txt');
+    fs.writeFileSync(filePath, text);
+    bot.sendDocument(chatId, filePath);
+  } catch {
+    bot.sendMessage(chatId, 'Ошибка при чтении истории.');
+  }
+  return;
+}
 
   if (data === 'ask') {
     bot.editMessageText('Выберите тему вопроса:', {
@@ -177,7 +215,7 @@ bot.on('callback_query', (query) => {
   }
 
   if (data === 'about me') {
-    bot.editMessageText('Я Diogonal777 (Вадим).\nКогда скучно создаю разные проекты.', {
+    bot.editMessageText('Я Diogonal777 (Вадим).\nКогда скучно программирую.', {
       chat_id: chatId,
       message_id: messageId,
       reply_markup: {
@@ -292,15 +330,16 @@ bot.on('message', (msg) => {
     appendToSheet(
   '111tEpDpi7RzCYbhcpxGFgWbxMQtuwYTRPcC2CXPH5ZU',
   'Лист1!A2',
-  [
-    targetId,
-    userQuestions[targetId]?.name || '(неизвестно)',
-    userQuestions[targetId]?.username || '',
-    userQuestions[targetId]?.topic || '',
-    question,
-    text,
-    new Date().toLocaleString()
-  ]
+[
+  new Date().toLocaleString(),
+  targetId,
+  userQuestions[targetId]?.name || '(неизвестно)',
+  userQuestions[targetId]?.username || '',
+  userQuestions[targetId]?.topic || '',
+  question,
+  text
+]
+
 );
 
     bot.sendMessage(ADMIN_ID, 'Ответ отправлен.');
@@ -490,4 +529,22 @@ bot.onText(/\/очередь/, (msg) => {
     });
   });
 });
-bot
+
+bot.onText(/\/admin/, (msg) => {
+  if (msg.chat.id !== ADMIN_ID) {
+    return bot.sendMessage(msg.chat.id, 'Это команда только для администратора.');
+  }
+
+  bot.sendMessage(ADMIN_ID, 'Выберите действие:', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Админ панель', url: 'https://dioginal-bot-telegram.onrender.com/admin' }],
+        [{ text: 'Статистика', callback_data: 'admin_stats' }],
+        [{ text: 'История (файл)', callback_data: 'admin_history_file' }],
+        [{ text: 'Статистика (таблица)', url: 'https://docs.google.com/spreadsheets/d/1yJ8FDwfC9txPFSr3DSzhQ4bsIJ5XzQJAp_JvxLdXEOs/edit' }],
+        [{ text: 'История (таблица)', url: 'https://docs.google.com/spreadsheets/d/111tEpDpi7RzCYbhcpxGFgWbxMQtuwYTRPcC2CXPH5ZU/edit' }]
+        ]
+    }
+  });
+});
+ 
