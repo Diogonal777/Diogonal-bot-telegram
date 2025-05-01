@@ -258,14 +258,13 @@ bot.on('message', (msg) => {
   }
 
   if (state && state.step === 'waiting_question') {
-    stats.total++;
-     if (!stats.users.includes(userName)) stats.users.push(userName);
-     saveStats(stats);
-    stats.users.add(`${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim());
     const userName = `${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim();
     const username = msg.from.username ? `@${msg.from.username}` : '(юзернейм отсутствует)';
     const topic = state.topic;
-
+    stats.total++;
+     if (!stats.users.includes(userName)) stats.users.push(userName);
+     saveStats(stats);
+    stats.users.add(`${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim()); 
     userQuestions[chatId] = {
       question: text,
       topic,
