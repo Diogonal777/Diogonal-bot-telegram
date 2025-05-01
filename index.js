@@ -8,7 +8,7 @@ const ADMIN_ID = 6091948159;
 const bot = new TelegramBot(token);
 const userStates = {};
 const userQuestions = {};
-
+const { Readable } = require('stream');
 const fs = require('fs');
 const path = require('path');
 const historyFile = path.join(__dirname, 'history.json');
@@ -251,4 +251,43 @@ bot.onText(/\/stats/, (msg) => {
     `Проигнорировано: ${stats.ignored}\n\n` +
     `Писали:\n${userList}`
   );
+});
+
+bot.onText(/\/history/, (msg) => {
+  if (msg.chat.id !== ADMIN_ID) return;
+
+  try {
+    const data = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+
+    if (!data.length) {
+      return bot.sendMessage(ADMIN_ID, 'История пуста.');
+    }
+
+    // Преобразуем в текст
+    const lines = data.map((entry, i) => {
+      return [
+        `#${i + 1}`,
+        `Дата: ${new Date(entry.timestamp).toLocaleString()}`,
+        `Пользователь: ${entry.userName} (ID: ${entry.userId})`,
+        `Тема: ${entry.topic}`,
+        `Вопрос: ${entry.question}`,
+        `Ответ: ${entry.answer || '(ещё нет)'}`,
+        `---`
+      ].join('\n');
+    });
+
+    const text = lines.join('\n\n');
+
+    // Создаём буфер и отправляем как файл
+    const stream = Readable.from([text]);
+
+    bot.sendDocument(ADMIN_ID, stream, {}, {
+      filename: 'history.txt',
+      contentType: 'text/plain'
+    });
+
+  } catch (err) {
+    console.error('Ошибка при отправке истории:', err);
+    bot.sendMessage(ADMIN_ID, 'Произошла ошибка при чтении истории.');
+  }
 });
