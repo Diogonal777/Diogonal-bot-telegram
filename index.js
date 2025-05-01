@@ -203,7 +203,8 @@ if (data.startsWith('ignore_')) {
     chat_id: chatId,
     message_id: messageId
   });
-}
+ }
+});
 
 // Обработка сообщений
 bot.on('message', (msg) => {
