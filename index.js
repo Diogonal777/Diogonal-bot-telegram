@@ -235,15 +235,6 @@ bot.on('message', (msg) => {
       name: userName
     };
 
-    saveToHistory({
-     userId: chatId,
-     userName: `${userName} (${username})`,
-     topic,
-     question: text,
-     answer: null,
-     timestamp: new Date().toISOString()
-    });
-
     bot.sendMessage(ADMIN_ID,
       `Новый вопрос:\n\nОт: ${userName} (${username})\nID: ${chatId}\nТема: ${topic}\n\nВопрос:\n${text}`, {
         reply_markup: {
