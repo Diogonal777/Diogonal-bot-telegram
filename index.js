@@ -264,7 +264,6 @@ bot.on('message', (msg) => {
     stats.total++;
      if (!stats.users.includes(userName)) stats.users.push(userName);
      saveStats(stats);
-    stats.users.add(`${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim()); 
     userQuestions[chatId] = {
       question: text,
       topic,
