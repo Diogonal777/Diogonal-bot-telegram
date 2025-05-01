@@ -206,7 +206,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
 });
-bot.onText(/\/статистика/, (msg) => {
+bot.onText(/\/stats/, (msg) => {
   if (msg.chat.id !== ADMIN_ID) return;
 
   const userList = Array.from(stats.users).join('\n') || '(нет данных)';
