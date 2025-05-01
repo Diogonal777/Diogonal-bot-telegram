@@ -9,6 +9,13 @@ const bot = new TelegramBot(token);
 const userStates = {};
 const userQuestions = {};
 
+const stats = {
+  total: 0,
+  answered: 0,
+  ignored: 0,
+  users: new Set()
+};
+
 // Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -112,7 +119,7 @@ bot.on('callback_query', (query) => {
     const targetId = data.split('_')[1];
     const question = userQuestions[targetId]?.question || '(вопрос не найден)';
     userStates[ADMIN_ID] = { step: 'awaiting_reply', targetId };
-
+    stats.answered++;
     const username = userQuestions[targetId]?.username || 'пользователя';
     bot.sendMessage(ADMIN_ID, `Напишите ответ для ${username} (${targetId}):\n\nВопрос: ${question}`);
     bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
@@ -123,6 +130,7 @@ bot.on('callback_query', (query) => {
 
   if (data.startsWith('ignore_')) {
     const targetId = data.split('_')[1];
+    stats.ignored++;
     const username = userQuestions[targetId]?.username || 'пользователя';
     bot.sendMessage(targetId, 'Ваш вопрос был отклонён администратором.');
     bot.sendMessage(ADMIN_ID, `Вы проигнорировали вопрос от ${username} (${targetId}).`);
@@ -149,6 +157,8 @@ bot.on('message', (msg) => {
   }
 
   if (state && state.step === 'waiting_question') {
+    stats.total++;
+    stats.users.add(`${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim());
     const userName = `${msg.from.first_name || ''} ${msg.from.last_name || ''}`.trim();
     const username = msg.from.username ? `@${msg.from.username}` : '(юзернейм отсутствует)';
     const topic = state.topic;
@@ -195,4 +205,16 @@ app.post('/webhook', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
+});
+bot.onText(/\/статистика/, (msg) => {
+  if (msg.chat.id !== ADMIN_ID) return;
+
+  const userList = Array.from(stats.users).join('\n') || '(нет данных)';
+  bot.sendMessage(ADMIN_ID,
+    `📊 Статистика:\n\n` +
+    `Всего вопросов: ${stats.total}\n` +
+    `Отвечено: ${stats.answered}\n` +
+    `Проигнорировано: ${stats.ignored}\n\n` +
+    `Писали:\n${userList}`
+  );
 });
