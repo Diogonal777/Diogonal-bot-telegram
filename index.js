@@ -28,22 +28,30 @@ function saveToHistory(entry, update = false) {
     const data = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
 
     if (update) {
-      // ищем по userId и вопросу
       const index = data.findIndex(e =>
         e.userId === entry.userId &&
-        e.question === entry.question &&
-        !e.answer
+        e.question === entry.question
       );
 
       if (index !== -1) {
-        data[index].answer = entry.answer;
-        data[index].timestamp = new Date().toISOString();
+        if (!data[index].answer) {
+          data[index].answer = entry.answer;
+          data[index].timestamp = new Date().toISOString();
+        }
       } else {
+        // fallback — если не найдено, добавим
         data.push(entry);
       }
 
     } else {
-      data.push(entry);
+      const duplicate = data.find(e =>
+        e.userId === entry.userId &&
+        e.question === entry.question
+      );
+
+      if (!duplicate) {
+        data.push(entry);
+      }
     }
 
     fs.writeFileSync(historyFile, JSON.stringify(data, null, 2));
@@ -320,5 +328,11 @@ bot.onText(/\/history/, (msg) => {
   } catch (err) {
     console.error('Ошибка при отправке истории:', err);
     bot.sendMessage(ADMIN_ID, 'Произошла ошибка при чтении истории.');
+  }
+});
+
+bot.onText(/^\/(статистика|history)$/, (msg) => {
+  if (msg.chat.id !== ADMIN_ID) {
+    return bot.sendMessage(msg.chat.id, 'Это команда для администратора.');
   }
 });
