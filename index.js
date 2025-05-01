@@ -17,6 +17,41 @@ if (!fs.existsSync(historyFile)) {
   fs.writeFileSync(historyFile, JSON.stringify([]));
 }
 
+const { google } = require('googleapis');
+
+// Загружаем ключ
+const GOOGLE_CREDENTIALS = {
+  type: "service_account",
+  project_id: "diogonal777-telegram-bot",
+  private_key_id: "376dbb2cdcaf3e68575cb8c8a7d760d217dbd397",
+  private_key: `-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDNY+zYjFCmVAIh\nT9q9yPbkstnd7vhDx4jdvCLa8jl
+  Jb4QXzp55g0ajVP8OxUJG4qk+BkEDdgkNV8Jy\nhl8/5e04HkS0nVIgfrY5+xdGch1c3G1E9SB/3of0C8km7sldlzAaFpSkZjZuOSCA\n+cvGT5SU2YoNMebOQHpj4Kqx2wHjAg8
+  x1gThrqXVRpfPZAo2Sc3sEoLnVTwoCoyE\ns4JNZq2aRpyJfAFPSl4aTPi9g+g2KiUgvbzzRx5bxM6o35uaR9jWyR3PRIpkuoqV\nQjXKG1DCRxlLzmN1UOHJUiBCZbo9iH4aCga
+  /RMMSDUFA3Bs5npW4W9uKSw5ZdPFr\n8fYl9MiNAgMBAAECggEAHEB6QAg/AL4OA/SGx3PJCEjUwJsiMbqU6EE8fybx+9i3\n0AmHEXpeAVIL+oVmOjdr5cD4+Oen05rGf7fdir3
+  PHVjGhRydwyQC32NbPoCsas1U\nR3e7ZnNe+pITc4RFlRbakkAYZqu7oXpArxUNM2RXcQkiXPHICIdkfnAVMr1IG2g6\nRNcWGeIeC+gg+3ohA1kD+KJ2tZOR8LKMbFsjI0eXJmU
+  Tvptwfm3zwPBJ/kvCA8yK\nAAD/sokoZ22rUITTEeT/2srZJo5UgtlJA3tpzG+ZMduQcMuTnYvlPFEJP1aee6sY\njNLYjhkPB/+g7Ay62pi+xbEXDENOIIrarixkVsSryQKBgQD
+  pHZACXLeW7ykDUgNt\nWlsRuIn0fR3ZKDW5pV2WxjV0AWz+zscaekejm+GOqX/NFa4H4jtHSHrdk94yTLy3\nJkmN420RMx2/Mvj4MJL2+RRV8DTjrqd6ATRqj2s5IjrEn9k+xwx
+  qrU88P4SWCck4\n8Im48EiHhZipSQ3zRmI5xK57uQKBgQDhjZm8UhWChTBDDHUCgpPnCtkh+CJQo7y9\nJpWRJ3TbSb3CzCxY9boA3B4Ej3RgFu87GKQa/d95GTr3ikzcqnVi8hc
+  QtYaOgMH+\nn9NEaklc/k7GEFVaJas09fPHiyzGXi1xAjOax5a+twak594hZcvKjxlZTfXkgtbc\nJ1WTnDildQKBgGUQsQelJN8mDtTmsJ+vRb5YEE9UEyW7vhcfb4TXqAMEPzn
+  1cfKz\nwu1WvqJ4L/U9CfdXCLYt4T7BRdru0/5fdhIy4G1NiP8E3VXU0VKLyFo9yuBPL0LA\n1PXB+g2KHopyduA1sddqDekj7JqT4Y5zEnKAkiFXNUlnZ8np4NoEwFTZAoGBALq
+  a\nt/IBxyHwpvkRuUyWU172rqVX8KveiyvCXEN27UrvOzuKR7Zhtb04Xu1O8ez9jHbL\n8BkUqGo74XkixmxZ6jwuJb8BL41+IQFToSoc9Q0mqG1c3gBy4a4zPbh9AFItYFL6\ni
+  08miSTHr4uG+VOQMIYo1cP4p9KiHLiPIlG5EXRxAoGBAIjC651NxVBSyeir8emv\nzLOfNSVIZjc35b4q/2hWAfOZrnT+HITRS0uoNhQhaMrTXBN7HJ4pB455qNXqPIEg\nsVNAr
+  isdu4xiKwtD8SVwcZSS8Tp5fCJmAiYaA9kdKwq92NIaDYwI8rsphFoiPsoZ\nwh4DyrJK+AuHAvsKr6DXaflq\n-----END PRIVATE KEY-----\n`,
+  client_email: "bot-sheets@diogonal777-telegram-bot.iam.gserviceaccount.com",
+  client_id: "102693091709790752792",
+  auth_uri: "https://accounts.google.com/o/oauth2/auth",
+  token_uri: "https://oauth2.googleapis.com/token",
+  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+  client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/bot-sheets%40diogonal777-telegram-bot.iam.gserviceaccount.com",
+  universe_domain: "googleapis.com"
+};
+
+// Авторизация
+const auth = new google.auth.GoogleAuth({
+  credentials: GOOGLE_CREDENTIALS,
+  scopes: ['https://www.googleapis.com/auth/spreadsheets']
+});
+
 let stats = loadStats();
 const statsFile = path.join(__dirname, 'stats.json');
 
@@ -76,6 +111,17 @@ function saveToHistory(entry, update = false) {
   } catch (err) {
     console.error('Ошибка при сохранении в историю:', err);
   }
+}
+
+async function appendToSheet(spreadsheetId, range, values) {
+  const sheets = google.sheets({ version: 'v4', auth: await auth.getClient() });
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range,
+    valueInputOption: 'RAW',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [values] }
+  });
 }
 
 // Команда /start
@@ -243,6 +289,20 @@ bot.on('message', (msg) => {
     const targetId = userStates[ADMIN_ID].targetId;
     const question = userQuestions[targetId]?.question || '(вопрос не найден)';
     bot.sendMessage(targetId, `Ваш вопрос:\n${question}\n\nОтвет администратора:\n${text}`);
+    appendToSheet(
+  '111tEpDpi7RzCYbhcpxGFgWbxMQtuwYTRPcC2CXPH5ZU',
+  'Лист1!A2',
+  [
+    targetId,
+    userQuestions[targetId]?.name || '(неизвестно)',
+    userQuestions[targetId]?.username || '',
+    userQuestions[targetId]?.topic || '',
+    question,
+    text,
+    new Date().toLocaleString()
+  ]
+);
+
     bot.sendMessage(ADMIN_ID, 'Ответ отправлен.');
     saveToHistory({
      userId: targetId,
