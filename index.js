@@ -9,12 +9,29 @@ const bot = new TelegramBot(token);
 const userStates = {};
 const userQuestions = {};
 
+const fs = require('fs');
+const path = require('path');
+const historyFile = path.join(__dirname, 'history.json');
+if (!fs.existsSync(historyFile)) {
+  fs.writeFileSync(historyFile, JSON.stringify([]));
+}
+
 const stats = {
   total: 0,
   answered: 0,
   ignored: 0,
   users: new Set()
 };
+
+function saveToHistory(entry) {
+  try {
+    const data = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+    data.push(entry);
+    fs.writeFileSync(historyFile, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error('Ошибка при сохранении в историю:', err);
+  }
+}
 
 // Команда /start
 bot.onText(/\/start/, (msg) => {
@@ -152,6 +169,14 @@ bot.on('message', (msg) => {
     const question = userQuestions[targetId]?.question || '(вопрос не найден)';
     bot.sendMessage(targetId, `Ваш вопрос:\n${question}\n\nОтвет администратора:\n${text}`);
     bot.sendMessage(ADMIN_ID, 'Ответ отправлен.');
+    saveToHistory({
+     userId: targetId,
+     userName: userQuestions[targetId]?.name || '(неизвестно)',
+     topic: userQuestions[targetId]?.topic || '(неизвестно)',
+     question: question,
+     answer: text,
+     timestamp: new Date().toISOString()
+    });
     userStates[ADMIN_ID] = null;
     return;
   }
@@ -169,6 +194,15 @@ bot.on('message', (msg) => {
       username,
       name: userName
     };
+
+    saveToHistory({
+     userId: chatId,
+     userName: `${userName} (${username})`,
+     topic,
+     question: text,
+     answer: null,
+     timestamp: new Date().toISOString()
+    });
 
     bot.sendMessage(ADMIN_ID,
       `Новый вопрос:\n\nОт: ${userName} (${username})\nID: ${chatId}\nТема: ${topic}\n\nВопрос:\n${text}`, {
