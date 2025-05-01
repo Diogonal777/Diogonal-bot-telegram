@@ -18,12 +18,6 @@ if (!fs.existsSync(historyFile)) {
 }
 
 let stats = loadStats();
-const stats = {
-  total: 0,
-  answered: 0,
-  ignored: 0,
-  users: new Set()
-};
 const statsFile = path.join(__dirname, 'stats.json');
 
 function loadStats() {
@@ -291,8 +285,8 @@ bot.on('message', (msg) => {
         reply_markup: {
           inline_keyboard: [
             [
-              { text: '✅ Ответить', callback_data: `reply_${chatId}` },
-              { text: '❌ Игнорировать', callback_data: `ignore_${chatId}` }
+              { text: '✅ Ответить', callback_data: `reply_${chatId}_${encodeURIComponent(text)}` },
+              { text: '❌ Игнорировать', callback_data: `ignore_${chatId}_${encodeURIComponent(text)}` }
             ]
           ]
         }
