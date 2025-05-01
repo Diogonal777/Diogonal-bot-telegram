@@ -303,11 +303,51 @@ bot.on('message', (msg) => {
 
 // Запуск сервера Express
 const app = express();
+const path = require('path');
 app.use(bodyParser.json());
 
 app.post('/webhook', (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
+});
+app.get('/admin', (req, res) => {
+  let html = `
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Админ-панель</title>
+      <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background-color: #f4f4f4; }
+        tr:hover { background-color: #f0f0f0; }
+        .small { font-size: 0.9em; color: gray; }
+      </style>
+    </head>
+    <body>
+      <h1>Очередь вопросов</h1>
+      <table>
+        <tr><th>#</th><th>Пользователь</th><th>Тема</th><th>Вопрос</th></tr>
+  `;
+
+  pendingQuestions.forEach((q, i) => {
+    html += `<tr>
+      <td>${i + 1}</td>
+      <td>${q.userName}<br><span class="small">ID: ${q.userId}</span></td>
+      <td>${q.topic}</td>
+      <td>${q.question}</td>
+    </tr>`;
+  });
+
+  html += `
+      </table>
+      <p>Всего в очереди: ${pendingQuestions.length}</p>
+    </body>
+    </html>
+  `;
+
+  res.send(html);
 });
 
 const PORT = process.env.PORT || 3000;
