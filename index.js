@@ -263,7 +263,6 @@ bot.onText(/\/history/, (msg) => {
       return bot.sendMessage(ADMIN_ID, 'История пуста.');
     }
 
-    // Преобразуем в текст
     const lines = data.map((entry, i) => {
       return [
         `#${i + 1}`,
@@ -277,11 +276,11 @@ bot.onText(/\/history/, (msg) => {
     });
 
     const text = lines.join('\n\n');
+    const filePath = path.join(__dirname, 'history.txt');
 
-    // Создаём буфер и отправляем как файл
-    const stream = Readable.from([text]);
+    fs.writeFileSync(filePath, text);
 
-    bot.sendDocument(ADMIN_ID, stream, {}, {
+    bot.sendDocument(ADMIN_ID, filePath, {}, {
       filename: 'history.txt',
       contentType: 'text/plain'
     });
