@@ -161,48 +161,49 @@ bot.on('callback_query', (query) => {
   }
 
   if (data.startsWith('reply_')) {
-    const targetId = data.split('_')[1];
-    const question = userQuestions[targetId]?.question || '(вопрос не найден)';
-    userStates[ADMIN_ID] = { step: 'awaiting_reply', targetId };
-    stats.answered++;
-    const index = pendingQuestions.findIndex(q => q.userId == targetId && q.question === question);
-    if (index !== -1) pendingQuestions.splice(index, 1);
-    const username = userQuestions[targetId]?.username || 'пользователя';
-    bot.sendMessage(ADMIN_ID, `Напишите ответ для ${username} (${targetId}):\n\nВопрос: ${question}`);
-    bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
-      chat_id: chatId,
-      message_id: messageId
-    });
-  }
+  const parts = data.split('_');
+  const targetId = parts[1];
+  const question = decodeURIComponent(parts.slice(2).join('_'));
 
-  if (data.startsWith('ignore_')) {
-    const targetId = data.split('_')[1];
-    stats.ignored++;
-    const username = userQuestions[targetId]?.username || 'пользователя';
-    bot.sendMessage(targetId, 'Ваш вопрос был отклонён администратором.');
-    bot.sendMessage(ADMIN_ID, `Вы проигнорировали вопрос от ${username} (${targetId}).`);
-    const question = userQuestions[targetId]?.question;
-     if (question) {
-      const question = userQuestions[targetId]?.question;
-      const index = pendingQuestions.findIndex(q => q.userId == targetId && q.question === question);
-      if (index !== -1) pendingQuestions.splice(index, 1);
+  userStates[ADMIN_ID] = { step: 'awaiting_reply', targetId };
 
-      saveToHistory({
-       userId: targetId,
-       userName: userQuestions[targetId]?.name || '(неизвестно)',
-       topic: userQuestions[targetId]?.topic || '(неизвестно)',
-       question: question,
-       answer: '(вопрос проигнорирован)',
-       timestamp: new Date().toISOString()
-      }, true);
-     }
+  bot.sendMessage(ADMIN_ID, `Напишите ответ для ${userQuestions[targetId]?.username || '(пользователь)'} (${targetId}):\n\nВопрос: ${question}`);
 
-    bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
-      chat_id: chatId,
-      message_id: messageId
-    });
-  }
-});
+  const index = pendingQuestions.findIndex(q => q.userId == targetId && q.question === question);
+  if (index !== -1) pendingQuestions.splice(index, 1);
+
+  bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
+    chat_id: chatId,
+    message_id: messageId
+  });
+ }
+  
+if (data.startsWith('ignore_')) {
+  const parts = data.split('_');
+  const targetId = parts[1];
+  const question = decodeURIComponent(parts.slice(2).join('_'));
+
+  bot.sendMessage(targetId, 'Ваш вопрос был отклонён администратором.');
+  bot.sendMessage(ADMIN_ID, `Вы проигнорировали вопрос от ${targetId}.`);
+
+  const index = pendingQuestions.findIndex(q => q.userId == targetId && q.question === question);
+  if (index !== -1) pendingQuestions.splice(index, 1);
+
+  // сохраняем в историю
+  saveToHistory({
+    userId: targetId,
+    userName: userQuestions[targetId]?.name || '(неизвестно)',
+    topic: userQuestions[targetId]?.topic || '(неизвестно)',
+    question,
+    answer: '(вопрос проигнорирован)',
+    timestamp: new Date().toISOString()
+  }, true);
+
+  bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
+    chat_id: chatId,
+    message_id: messageId
+  });
+}
 
 // Обработка сообщений
 bot.on('message', (msg) => {
@@ -349,17 +350,16 @@ bot.onText(/\/очередь/, (msg) => {
     return bot.sendMessage(ADMIN_ID, 'Очередь пуста — все вопросы обработаны.');
   }
 
-  const lines = pendingQuestions.map((q, i) => {
-    return [
-      `#${i + 1}`,
-      `От: ${q.userName}`,
-      `ID: ${q.userId}`,
-      `Тема: ${q.topic}`,
-      `Вопрос: ${q.question}`,
-      `---`
-    ].join('\n');
-  });
+  pendingQuestions.forEach((q, i) => {
+    const text = `#${i + 1}\nОт: ${q.userName}\nID: ${q.userId}\nТема: ${q.topic}\nВопрос: ${q.question}`;
 
-  const text = lines.join('\n\n');
-  bot.sendMessage(ADMIN_ID, `Нерассмотренные вопросы:\n\n${text}`);
+    bot.sendMessage(ADMIN_ID, text, {
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '✅ Ответить', callback_data: `reply_${q.userId}_${encodeURIComponent(q.question)}` },
+          { text: '❌ Игнорировать', callback_data: `ignore_${q.userId}_${encodeURIComponent(q.question)}` }
+        ]]
+      }
+    });
+  });
 });
