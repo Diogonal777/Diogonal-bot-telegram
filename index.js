@@ -464,7 +464,7 @@ bot.onText(/\/history/, (msg) => {
   }
 });
 
-bot.onText(/^\/(stats|history)$/, (msg) => {
+bot.onText(/^\/(stats|history|очередь|admin)$/, (msg) => {
   if (msg.chat.id !== ADMIN_ID) {
     return bot.sendMessage(msg.chat.id, 'Это команда для администратора.');
   }
@@ -490,3 +490,4 @@ bot.onText(/\/очередь/, (msg) => {
     });
   });
 });
+bot
