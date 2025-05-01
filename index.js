@@ -8,6 +8,7 @@ const ADMIN_ID = 6091948159;
 const bot = new TelegramBot(token);
 const userStates = {};
 const userQuestions = {};
+const pendingQuestions = [];
 const { Readable } = require('stream');
 const fs = require('fs');
 const path = require('path');
@@ -164,6 +165,8 @@ bot.on('callback_query', (query) => {
     const question = userQuestions[targetId]?.question || '(вопрос не найден)';
     userStates[ADMIN_ID] = { step: 'awaiting_reply', targetId };
     stats.answered++;
+    const index = pendingQuestions.findIndex(q => q.userId == targetId && q.question === question);
+    if (index !== -1) pendingQuestions.splice(index, 1);
     const username = userQuestions[targetId]?.username || 'пользователя';
     bot.sendMessage(ADMIN_ID, `Напишите ответ для ${username} (${targetId}):\n\nВопрос: ${question}`);
     bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
@@ -180,6 +183,10 @@ bot.on('callback_query', (query) => {
     bot.sendMessage(ADMIN_ID, `Вы проигнорировали вопрос от ${username} (${targetId}).`);
     const question = userQuestions[targetId]?.question;
      if (question) {
+      const question = userQuestions[targetId]?.question;
+      const index = pendingQuestions.findIndex(q => q.userId == targetId && q.question === question);
+      if (index !== -1) pendingQuestions.splice(index, 1);
+
       saveToHistory({
        userId: targetId,
        userName: userQuestions[targetId]?.name || '(неизвестно)',
@@ -234,6 +241,13 @@ bot.on('message', (msg) => {
       username,
       name: userName
     };
+
+    pendingQuestions.push({
+     userId: chatId,
+     userName: `${userName} (${username})`,
+     topic,
+     question: text
+   });
 
     bot.sendMessage(ADMIN_ID,
       `Новый вопрос:\n\nОт: ${userName} (${username})\nID: ${chatId}\nТема: ${topic}\n\nВопрос:\n${text}`, {
@@ -322,8 +336,30 @@ bot.onText(/\/history/, (msg) => {
   }
 });
 
-bot.onText(/^\/(статистика|history)$/, (msg) => {
+bot.onText(/^\/(stats|history)$/, (msg) => {
   if (msg.chat.id !== ADMIN_ID) {
     return bot.sendMessage(msg.chat.id, 'Это команда для администратора.');
   }
+});
+
+bot.onText(/\/очередь/, (msg) => {
+  if (msg.chat.id !== ADMIN_ID) return;
+
+  if (pendingQuestions.length === 0) {
+    return bot.sendMessage(ADMIN_ID, 'Очередь пуста — все вопросы обработаны.');
+  }
+
+  const lines = pendingQuestions.map((q, i) => {
+    return [
+      `#${i + 1}`,
+      `От: ${q.userName}`,
+      `ID: ${q.userId}`,
+      `Тема: ${q.topic}`,
+      `Вопрос: ${q.question}`,
+      `---`
+    ].join('\n');
+  });
+
+  const text = lines.join('\n\n');
+  bot.sendMessage(ADMIN_ID, `Нерассмотренные вопросы:\n\n${text}`);
 });
