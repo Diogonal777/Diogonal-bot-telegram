@@ -23,10 +23,29 @@ const stats = {
   users: new Set()
 };
 
-function saveToHistory(entry) {
+function saveToHistory(entry, update = false) {
   try {
     const data = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
-    data.push(entry);
+
+    if (update) {
+      // ищем по userId и вопросу
+      const index = data.findIndex(e =>
+        e.userId === entry.userId &&
+        e.question === entry.question &&
+        !e.answer
+      );
+
+      if (index !== -1) {
+        data[index].answer = entry.answer;
+        data[index].timestamp = new Date().toISOString();
+      } else {
+        data.push(entry);
+      }
+
+    } else {
+      data.push(entry);
+    }
+
     fs.writeFileSync(historyFile, JSON.stringify(data, null, 2));
   } catch (err) {
     console.error('Ошибка при сохранении в историю:', err);
@@ -151,6 +170,18 @@ bot.on('callback_query', (query) => {
     const username = userQuestions[targetId]?.username || 'пользователя';
     bot.sendMessage(targetId, 'Ваш вопрос был отклонён администратором.');
     bot.sendMessage(ADMIN_ID, `Вы проигнорировали вопрос от ${username} (${targetId}).`);
+    const question = userQuestions[targetId]?.question;
+     if (question) {
+      saveToHistory({
+       userId: targetId,
+       userName: userQuestions[targetId]?.name || '(неизвестно)',
+       topic: userQuestions[targetId]?.topic || '(неизвестно)',
+       question: question,
+       answer: '(вопрос проигнорирован)',
+       timestamp: new Date().toISOString()
+      }, true);
+     }
+
     bot.editMessageReplyMarkup({ inline_keyboard: [] }, {
       chat_id: chatId,
       message_id: messageId
@@ -176,7 +207,8 @@ bot.on('message', (msg) => {
      question: question,
      answer: text,
      timestamp: new Date().toISOString()
-    });
+    }, true);
+
     userStates[ADMIN_ID] = null;
     return;
   }
