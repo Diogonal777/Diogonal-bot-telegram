@@ -161,24 +161,27 @@ bot.on('callback_query', (query) => {
   );
   return;
 }
-if (chatId === ADMIN_ID && data === 'admin_queue') {
-  if (pendingQuestions.length === 0) {
-    return bot.sendMessage(ADMIN_ID, 'Очередь пуста — все вопросы обработаны.');
+
+  if (chatId === ADMIN_ID && data === 'admin_queue') {
+    if (pendingQuestions.length === 0) {
+      return bot.sendMessage(chatId, 'Очередь пуста — все вопросы обработаны.');
+    }
+
+    pendingQuestions.forEach((q, i) => {
+      const text = `#${i + 1}\nОт: ${q.userName}\nID: ${q.userId}\nТема: ${q.topic}\nВопрос: ${q.question}`;
+
+      bot.sendMessage(ADMIN_ID, text, {
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '✅ Ответить', callback_data: `reply_${q.userId}_${encodeURIComponent(q.question)}` },
+            { text: '❌ Игнорировать', callback_data: `ignore_${q.userId}_${encodeURIComponent(q.question)}` }
+          ]]
+        }
+      });
+    });
+    return;
   }
 
-  pendingQuestions.forEach((q, i) => {
-    const text = `#${i + 1}\nОт: ${q.userName}\nID: ${q.userId}\nТема: ${q.topic}\nВопрос: ${q.question}`;
-
-    bot.sendMessage(ADMIN_ID, text, {
-      reply_markup: {
-        inline_keyboard: [[
-          { text: '✅ Ответить', callback_data: `reply_${q.userId}_${encodeURIComponent(q.question)}` },
-          { text: '❌ Игнорировать', callback_data: `ignore_${q.userId}_${encodeURIComponent(q.question)}` }
-        ]]
-      }
-    });
-  });
-}
 
 if (chatId === ADMIN_ID && data === 'admin_history_file') {
   try {
@@ -539,8 +542,8 @@ bot.onText(/\/admin/, (msg) => {
         [{ text: 'Очередь', callback_data: 'admin_queue' }], 
         [{ text: 'Статистика', callback_data: 'admin_stats' }],
         [{ text: 'История (файл)', callback_data: 'admin_history_file' }],
-        [[{ text: 'Статистика (таблица)', url: 'https://docs.google.com/spreadsheets/d/1yJ8FDwfC9txPFSr3DSzhQ4bsIJ5XzQJAp_JvxLdXEOs/edit' },
-          { text: 'История (таблица)', url: 'https://docs.google.com/spreadsheets/d/111tEpDpi7RzCYbhcpxGFgWbxMQtuwYTRPcC2CXPH5ZU/edit' }]] 
+        [{ text: 'Статистика (таблица)', url: 'https://docs.google.com/spreadsheets/d/1yJ8FDwfC9txPFSr3DSzhQ4bsIJ5XzQJAp_JvxLdXEOs/edit' },
+         { text: 'История (таблица)', url: 'https://docs.google.com/spreadsheets/d/111tEpDpi7RzCYbhcpxGFgWbxMQtuwYTRPcC2CXPH5ZU/edit' }]
         ]
     }
   });
