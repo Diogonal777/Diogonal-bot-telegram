@@ -538,7 +538,7 @@ bot.onText(/\/admin/, (msg) => {
   bot.sendMessage(ADMIN_ID, 'Выберите действие:', {
     reply_markup: {
       inline_keyboard: [
-        [{ text: 'Админ панель', url: 'https://dioginal-bot-telegram.onrender.com/admin' }],
+        [{ text: 'Админ панель', url: 'https://diogonal-bot-telegram.onrender.com/admin' }],
         [{ text: 'Очередь', callback_data: 'admin_queue' }], 
         [{ text: 'Статистика', callback_data: 'admin_stats' }],
         [{ text: 'История (файл)', callback_data: 'admin_history_file' }],
