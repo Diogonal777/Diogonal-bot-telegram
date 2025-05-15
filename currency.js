@@ -1,23 +1,33 @@
-const { User } = require("./database");
+import { db, doc, getDoc, setDoc } from "./firebase.js";
 
 async function getBalance(userId) {
-    let user = await User.findOne({ userId });
-    if (!user) {
-        user = new User({ userId });
-        await user.save();
+    const userRef = doc(db, "users", String(userId));
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+        // Создаем пользователя с первоначальным балансом (например, 100)
+        await setDoc(userRef, { balance: 100 });
+        return 100;
     }
-    return user.balance;
+    const data = userSnap.data();
+    return data.balance;
 }
 
 async function updateBalance(userId, amount) {
-    let user = await User.findOne({ userId });
-    if (!user) {
-        user = new User({ userId });
-        await user.save();
+    const userRef = doc(db, "users", String(userId));
+    const userSnap = await getDoc(userRef);
+    let currentBalance = 0;
+  
+    if (!userSnap.exists()) {
+        // Если пользователь не существует, то создаем с начальными 100 монетами
+        currentBalance = 100;
+    } else {
+        currentBalance = userSnap.data().balance;
     }
-    user.balance += amount;
-    await user.save();
-    return user.balance;
+  
+    const newBalance = currentBalance + amount;
+    await setDoc(userRef, { balance: newBalance });
+    return newBalance;
 }
 
-module.exports = { getBalance, updateBalance };
+export { getBalance, updateBalance };
