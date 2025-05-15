@@ -5,6 +5,10 @@ const bodyParser = require('body-parser');
 const token = process.env.TELEGRAM_TOKEN;
 const ADMIN_ID = 6091948159;
 
+const { startGame } = require("./game/gameLogic");
+const { playCasino } = require("./game/casino");
+const { startDuel } = require("./game/duel");
+
 const bot = new TelegramBot(token);
 const userStates = {};
 const userQuestions = {};
@@ -146,6 +150,10 @@ bot.on('callback_query', (query) => {
   const chatId = query.message.chat.id;
   const messageId = query.message.message_id;
   const data = query.data;
+  const chatId = query.message.chat.id;
+  if (query.data === "game") startGame(chatId);
+  else if (query.data === "casino") playCasino(chatId);
+  else if (query.data === "duel") startDuel(chatId);
   if (getCurrentWeek() !== stats.week) {
   stats = { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
   saveStats(stats);
@@ -548,4 +556,15 @@ bot.onText(/\/admin/, (msg) => {
     }
   });
 });
- 
+
+bot.onText(/\/games/, (msg) => {
+    bot.sendMessage(msg.chat.id, "Добро пожаловать! Выберите режим:", {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: "🎭 Играть", callback_data: "game" }],
+                [{ text: "🎰 Казино", callback_data: "casino" }],
+                [{ text: "⚔️ Дуэль", callback_data: "duel" }]
+            ]
+        }
+    });
+}); 
