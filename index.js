@@ -150,7 +150,6 @@ bot.on('callback_query', (query) => {
   const chatId = query.message.chat.id;
   const messageId = query.message.message_id;
   const data = query.data;
-  const chatId = query.message.chat.id;
   if (query.data === "game") startGame(chatId);
   else if (query.data === "casino") playCasino(chatId);
   else if (query.data === "duel") startDuel(chatId);
