@@ -150,9 +150,9 @@ bot.on('callback_query', (query) => {
   const chatId = query.message.chat.id;
   const messageId = query.message.message_id;
   const data = query.data;
-  if (query.data === "game") startGame(chatId);
-  else if (query.data === "casino") playCasino(chatId);
-  else if (query.data === "duel") startDuel(chatId);
+  if (query.data === "game") startGame(bot, chatId);
+  if (query.data === "casino") playCasino(bot, chatId);
+  if (query.data === "duel") startDuel(bot, chatId);
   if (getCurrentWeek() !== stats.week) {
   stats = { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
   saveStats(stats);
