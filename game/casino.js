@@ -1,5 +1,4 @@
 function playCasino(bot, chatId) {
-    const chatId = msg.chat.id;
     bot.sendMessage(chatId, "Добро пожаловать в Казино! Выберите ставку:", {
         reply_markup: {
             keyboard: [
