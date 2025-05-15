@@ -1,43 +1,68 @@
-function playCasino(bot, chatId) {
-    bot.sendMessage(chatId, "Выберите ставку:", {
-        reply_markup: {
-            keyboard: [
-                ['10', '50', '100'],
-                ['Игра ', 'Выход'],
-            ],
-            resize_keyboard: true,
-            one_time_keyboard: true,
-        },
-    });
-
-// Обработка нажатия кнопок с ставками
-bot.on('message', (msg) => {
-    const chatId = msg.chat.id;
-
-    if (['10', '50', '100'].includes(msg.text)) {
-        const bet = parseInt(msg.text);
-        if (bet > userFunds) {
-            bot.sendMessage(chatId, "Недостаточно средств для этой ставки.");
-        } else {
-            // Логика игры: выигрыш или проигрыш
-            const win = Math.random() < 0.5; // Заменить на вашу логику
-            if (win) {
-                userFunds += bet;
-                bot.sendMessage(chatId, `Вы выиграли! Теперь у вас: ${userFunds}`);
-            } else {
-                userFunds -= bet;
-                bot.sendMessage(chatId, `Вы проиграли! Теперь у вас: ${userFunds}`);
-            }
-        }
-    } else if (msg.text === 'Игра') {
-        bot.sendMessage(chatId, "Выберите ставку:");
-        // Отправка меню с кнопками ставок вновь
-    } else if (msg.text === 'Выход') {
-        bot.sendMessage(chatId, "Спасибо за игру! До свидания!");
-    } else {
-        bot.sendMessage(chatId, "Пожалуйста, выберите правильную опцию.");
-    }
-});
+function casinoMenu(bot, chatId) {
+    const keyboard = {
+        inline_keyboard: [
+            [{ text: "🎲 Рандом", callback_data: "random" }],
+            [{ text: "🃏 Black Jack", callback_data: "blackjack" }],
+            [{ text: "🎲 Кости", callback_data: "dice" }],
+            [{ text: "🎰 Игровой автомат", callback_data: "slot" }]
+        ]
+    };
+    bot.sendMessage(chatId, "🎰 Добро пожаловать в казино!\nВыберите игру:", { reply_markup: keyboard });
 }
-module.exports = { userFunds };
-module.exports = { playCasino };
+
+async function setBet(bot, chatId, gameType) {
+    bot.sendMessage(chatId, `💰 Напишите вашу ставку (не больше 100000) для **${gameType}**.`);
+}
+
+async function playGame(bot, chatId, gameType, bet) {
+    if (bet > 100000) {
+        bot.sendMessage(chatId, "❌ Ставка слишком большая! Максимальная сумма — 100000.");
+        return;
+    }
+
+    let result;
+    switch (gameType) {
+        case "random":
+            result = Math.random() < 0.5 ? "✅ Победа! 🎉" : "❌ Проигрыш...";
+            break;
+        case "blackjack":
+            result = playBlackJack();
+            break;
+        case "dice":
+            result = playDice();
+            break;
+        case "slot":
+            result = playSlot();
+            break;
+        default:
+            result = "❌ Ошибка! Попробуйте снова.";
+    }
+
+    bot.sendMessage(chatId, `🎰 Результат игры **${gameType}**:\n${result}`);
+}
+
+// Логика игр
+function playBlackJack() {
+    const playerScore = Math.floor(Math.random() * 21) + 1;
+    const dealerScore = Math.floor(Math.random() * 21) + 1;
+    return `🃏 Ваш счет: ${playerScore}, счет дилера: ${dealerScore}. ` +
+        (playerScore > dealerScore ? "✅ Победа!" : "❌ Вы проиграли...");
+}
+
+function playDice() {
+    const playerRoll = Math.floor(Math.random() * 6) + 1;
+    const botRoll = Math.floor(Math.random() * 6) + 1;
+    return `🎲 Вы бросили: ${playerRoll}, бот бросил: ${botRoll}. ` +
+        (playerRoll > botRoll ? "✅ Вы победили!" : "❌ Проигрыш...");
+}
+
+function playSlot() {
+    const symbols = ["🍒", "🔔", "⭐", "7️⃣", "🍀"];
+    const slotResult = [symbols[Math.floor(Math.random() * symbols.length)],
+                        symbols[Math.floor(Math.random() * symbols.length)],
+                        symbols[Math.floor(Math.random() * symbols.length)]];
+    return `🎰 Ваша комбинация: ${slotResult.join(" | ")}\n` +
+        (slotResult[0] === slotResult[1] && slotResult[1] === slotResult[2] ? "✅ Джекпот!" : "❌ Попробуйте ещё...");
+}
+
+module.exports = { casinoMenu, setBet, playGame };
