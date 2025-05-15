@@ -8,7 +8,7 @@ const ADMIN_ID = 6091948159;
 const { startGame } = require("./game/gameLogic");
 const { playCasino } = require("./game/casino");
 const { startDuel } = require("./game/duel");
-let userFunds = 1000;
+const { getBalance, updateBalance } = require("./currency");
 const bot = new TelegramBot(token);
 const userStates = {};
 const userQuestions = {};
@@ -566,5 +566,18 @@ bot.onText(/\/games/, (msg) => {
             ]
         }
     });
-}); 
-module.exports = { userFunds };
+});
+
+bot.onText(/\/balance/, async (msg) => {
+    const chatId = msg.chat.id;
+    const balance = await getBalance(chatId);
+    bot.sendMessage(chatId, `💰 Ваш баланс: ${balance} монет`);
+});
+bot.onText(/\/addmoney (\d+)/, async (msg, match) => {
+  if (msg.chat.id !== ADMIN_ID) {
+      return bot.sendMessage(msg.chat.id, 'Это команда только для администратора.');}
+    const chatId = msg.chat.id;
+    const amount = parseInt(match[1]);
+    const newBalance = await updateBalance(chatId, amount);
+    bot.sendMessage(chatId, `✅ Вы получили ${amount} монет!\n💰 Ваш новый баланс: ${newBalance}`);
+});
