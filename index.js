@@ -8,7 +8,7 @@ const ADMIN_ID = 6091948159;
 const { startGame } = require("./game/gameLogic");
 const { playCasino } = require("./game/casino");
 const { startDuel } = require("./game/duel");
-
+let userFunds = 1000;
 const bot = new TelegramBot(token);
 const userStates = {};
 const userQuestions = {};
@@ -567,3 +567,4 @@ bot.onText(/\/games/, (msg) => {
         }
     });
 }); 
+module.exports = { userFunds };
