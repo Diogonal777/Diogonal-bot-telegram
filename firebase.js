@@ -1,5 +1,6 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+// firebase.js
+const firebase = require('firebase/compat/app'); // Используем compat-версию
+require('firebase/compat/firestore'); // Подключаем Firestore
 
 const firebaseConfig = {
   apiKey: "AIzaSyBI9shbtF-E7EXGY5xrLYoh5_AyKzmyl80",
@@ -11,7 +12,10 @@ const firebaseConfig = {
   measurementId: "G-244JWB8K2Z"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Инициализируем Firebase-приложение
+firebase.initializeApp(firebaseConfig);
 
-export { db, doc, setDoc, getDoc };
+// Получаем экземпляр Firestore
+const db = firebase.firestore();
+
+module.exports = { db };
