@@ -1,4 +1,4 @@
-function startGame(chatId) {
+function startGame(bot, chatId) {
     bot.sendMessage(chatId, "🌟 Начинаем приключение! Выберите персонажа: Воин, Маг, Вор.");
 }
 module.exports = { startGame };
