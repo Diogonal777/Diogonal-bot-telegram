@@ -1,5 +1,5 @@
 function playCasino(bot, chatId) {
-    bot.sendMessage(chatId, "Добро пожаловать в Казино! Выберите ставку:", {
+    bot.sendMessage(chatId, "Выберите ставку:", {
         reply_markup: {
             keyboard: [
                 ['10', '50', '100'],
@@ -38,6 +38,6 @@ bot.on('message', (msg) => {
         bot.sendMessage(chatId, "Пожалуйста, выберите правильную опцию.");
     }
 });
-
+}
 module.exports = { userFunds };
 module.exports = { playCasino };
