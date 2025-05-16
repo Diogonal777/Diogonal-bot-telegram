@@ -6,7 +6,7 @@ const token = process.env.TELEGRAM_TOKEN;
 const ADMIN_ID = 6091948159;
 
 const { startGame } = require("./game/gameLogic");
-const { playCasino } = require("./game/casino");
+const { casinoMenu } = require("./game/casino");
 const { startDuel } = require("./game/duel");
 const { getBalance, updateBalance } = require("./currency");
 const bot = new TelegramBot(token);
@@ -151,7 +151,7 @@ bot.on('callback_query', (query) => {
   const messageId = query.message.message_id;
   const data = query.data;
   if (query.data === "game") startGame(bot, chatId);
-  if (query.data === "casino") playCasino(bot, chatId);
+  if (query.data === "casino") casinoMenu(bot, chatId);
   if (query.data === "duel") startDuel(bot, chatId);
   if (getCurrentWeek() !== stats.week) {
   stats = { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
