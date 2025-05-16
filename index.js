@@ -6,7 +6,7 @@ const token = process.env.TELEGRAM_TOKEN;
 const ADMIN_ID = 6091948159;
 
 const { startGame } = require("./game/gameLogic");
-const { casinoMenu } = require("./game/casino");
+const { casinoMenu } = require('./game/casino');
 const { startDuel } = require("./game/duel");
 const { getBalance, updateBalance } = require("./currency");
 const bot = new TelegramBot(token);
@@ -150,9 +150,18 @@ bot.on('callback_query', (query) => {
   const chatId = query.message.chat.id;
   const messageId = query.message.message_id;
   const data = query.data;
-  if (query.data === "game") startGame(bot, chatId);
-  if (query.data === "casino") casinoMenu(bot, chatId);
-  if (query.data === "duel") startDuel(bot, chatId);
+
+    if (data === 'casino') {
+    casinoMenu(bot, chatId);
+    return;
+  }
+
+  if (['random', 'blackjack', 'dice', 'slot'].includes(data)) {
+    // Сохраняем выбранную игру
+    userStates[chatId] = { step: 'casino_bet', gameType: data };
+    return setBet(bot, chatId, data);
+  }
+
   if (getCurrentWeek() !== stats.week) {
   stats = { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
   saveStats(stats);
@@ -350,6 +359,16 @@ bot.on('message', (msg) => {
   stats = { total: 0, answered: 0, ignored: 0, users: [], week: getCurrentWeek() };
   saveStats(stats);
 }
+
+  if (state && state.step === 'casino_bet') {
+    const bet = parseInt(msg.text);
+    if (isNaN(bet) || bet <= 0) {
+      return bot.sendMessage(chatId, '❌ Введите число больше 0.');
+    }
+    playGame(bot, chatId, state.gameType, bet);
+    userStates[chatId] = null;
+    return;
+  }
 
   if (chatId === ADMIN_ID && userStates[ADMIN_ID]?.step === 'awaiting_reply') {
     const targetId = userStates[ADMIN_ID].targetId;
