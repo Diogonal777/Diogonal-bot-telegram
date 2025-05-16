@@ -6,7 +6,7 @@ const token = process.env.TELEGRAM_TOKEN;
 const ADMIN_ID = 6091948159;
 
 const { startGame } = require("./game/gameLogic");
-const { casinoMenu } = require('./game/casino');
+const { casinoMenu, setBet, playGame } = require('./game/casino');
 const { startDuel } = require("./game/duel");
 const { getBalance, updateBalance } = require("./currency");
 const bot = new TelegramBot(token);
