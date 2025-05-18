@@ -11,7 +11,7 @@ const { getBalance, updateBalance } = require('./currency');
 
 // Константы
 const ADMIN_ID = 6091948159;
-const token = process.env.TELEGRAM_TOKEN || 'YOUR_TELEGRAM_TOKEN'; // Замените на свой токен
+const token = process.env.TELEGRAM_TOKEN || '7632117465:AAHfjLNdQTUmNOwVVTRojALf0-oV3IbjxQw';
 const PORT = process.env.PORT || 3000;
 
 // Инициализация бота и Express-приложения
