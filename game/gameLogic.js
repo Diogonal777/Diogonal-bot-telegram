@@ -7,7 +7,7 @@ const GAMES = {
     minBet: 10,
     maxBet: 1000,
     winMultiplier: 1.8
-  },
+  }, 
   blackjack: {
     minBet: 20,
     maxBet: 1500,
