@@ -9,8 +9,9 @@ const { startGame } = require("./game/gameLogic");
 const { casinoMenu, setBet, playGame } = require('./game/casino');
 const { startDuel } = require("./game/duel");
 const { getBalance, updateBalance } = require("./currency");
-const bot = new TelegramBot(token);
-
+const bot = new TelegramBot(token, { webHook: true });
+const url = process.env.APP_URL; // например: 'https://diogonal-bot-telegram.onrender.com'
+bot.setWebHook(`${url}/webhook`);
 const userStates = {};
 const userQuestions = {};
 const pendingQuestions = [];
