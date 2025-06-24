@@ -9,11 +9,7 @@ const { startGame } = require("./game/gameLogic");
 const { casinoMenu, setBet, playGame } = require('./game/casino');
 const { startDuel } = require("./game/duel");
 const { getBalance, updateBalance } = require("./currency");
-const bot = new TelegramBot(token, {
-  webHook: {
-    port: process.env.PORT
-  }
-});
+const bot = new TelegramBot(token);
 bot.setWebHook(`https://${process.env.RENDER_SERVICE_NAME}.onrender.com/webhook`);
 
 const userStates = {};
